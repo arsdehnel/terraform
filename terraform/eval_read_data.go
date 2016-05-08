@@ -49,6 +49,15 @@ func (n *EvalReadData) Eval(ctx EvalContext) (interface{}, error) {
 		return nil, fmt.Errorf("%s: %s", n.Info.Id, err.Error())
 	}
 
+	// Instance id doesn't really do anything for data resources
+	// since we effectively re-create them on each read anyway, so
+	// if the implementation doesn't provide one we'll just set
+	// a placeholder to preserve the invariant that all resource
+	// instances must have a non-empty id.
+	if state.ID == "" {
+		state.ID = "-"
+	}
+
 	// Call post-refresh hook
 	err = ctx.Hook(func(h Hook) (HookAction, error) {
 		return h.PostRefresh(n.Info, state)
